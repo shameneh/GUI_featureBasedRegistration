@@ -41,6 +41,8 @@ class MyGui(QWidget):
         dw = QDesktopWidget()
         self.setFixedSize(dw.width()*1,dw.height()*0.9)
         self.setWindowTitle("Neuro Soph - Image Registration")
+        self.height = 700
+        self.width  = 420
 
         btn_selectMV = QPushButton("Select Moving Image")
 
@@ -78,22 +80,22 @@ class MyGui(QWidget):
         self.scrollf.setWidget(self.fixedImageLB)
         self.scrollf.setVisible(True)
         self.scrollf.setWidgetResizable(True)
-        self.scrollf.setFixedHeight(700)
-        self.scrollf.setFixedWidth(420)
+        self.scrollf.setFixedHeight(self.height)
+        self.scrollf.setFixedWidth(self.width)
 
         self.scrollr = QScrollArea()
         self.scrollr.setWidget(self.resultLB)
         self.scrollr.setVisible(True)
         self.scrollr.setWidgetResizable(True)
-        self.scrollr.setFixedHeight(700)
-        self.scrollr.setFixedWidth(420)
+        self.scrollr.setFixedHeight(self.height)
+        self.scrollr.setFixedWidth(self.width)
 
         self.scrollm = QScrollArea()
         self.scrollm.setWidget(self.movingImageLB)
         self.scrollm.setVisible(True)
         self.scrollm.setWidgetResizable(True)
-        self.scrollm.setFixedHeight(700)
-        self.scrollm.setFixedWidth(420)
+        self.scrollm.setFixedHeight(self.height)
+        self.scrollm.setFixedWidth(self.width)
 
         self.PAGE_DPI=150
 
@@ -192,15 +194,17 @@ class MyGui(QWidget):
 
 
     def removeFeature(self):
+
         if(self.x!=-1 and self.y!=-1):
             print(self.x, self.y)
+
             p1 = QPoint()
             p1.setX(self.x)  # point.pt[0]
-            p1.setY(self.y)  # point.pt[1]
+            p1.setY(self.y) # point.pt[1]
 
-            selected = False
+            self.selectedF = False
 
-            if selected!=True:#self.x <= 543 and self.x >= 142 and self.y <= 743 and self.y >= 45:
+            if self.x <= self.scrollf.x()+self.width and self.x >= self.scrollf.x() and self.y <= self.scrollf.y()+self.height and self.y >= self.scrollf.y():
 
                 rv = self.mapToGlobal(p1)
                 self.newp = self.fixedImageLB.mapFromGlobal(rv)
@@ -216,19 +220,18 @@ class MyGui(QWidget):
                 self.fixedImageLB.setPixmap(pixMapf)
                 newk=[]
                 for point in self.keypoints[0]:
-                    # point=self.keypoints[0][i]
                     if (int(point.pt[0]) <= int(self.newp.x())+2 and int(point.pt[0]) >=int(self.newp.x())-2):
                         if(int(point.pt[1]) <= int(self.newp.y())+2 and int(point.pt[1]) >= int(self.newp.y())-2):
                             print('yes')
-                            selected=True
+                            self.selectedF=True
                         else:
                             newk.append(point)
                     else:
                         newk.append(point)
-                if selected:
+                if self.selectedF:
                     self.keypoints[0]=newk
-            if selected!=True:#self.x <= 982 and self.x >= 553 and self.y <= 743 and self.y >= 45:
-                selectedM=False
+            elif self.x <=self.scrollm.x()+self.width and self.x >= self.scrollm.x()and self.y <= self.scrollm.y()+self.height and self.y >= self.scrollm.y():
+                self.selectedM=False
                 rvm = self.mapToGlobal(p1)
                 self.newpm = self.movingImageLB.mapFromGlobal(rvm)
                 print("selected ", self.newpm.x(), self.newpm.y())
@@ -246,22 +249,22 @@ class MyGui(QWidget):
                     if (int(pointm.pt[0]) <= int(self.newpm.x()) + 2 and int(pointm.pt[0]) >= int(self.newpm.x()) - 2):
                         if (int(pointm.pt[1]) <= int(self.newpm.y()) + 2 and int(pointm.pt[1]) >= int(self.newpm.y()) - 2):
                             print('yes')  # remove this point
-                            selectedM=True
+                            self.selectedM=True
                         else:
                             newmk.append(pointm)
                     else:
                         newmk.append(pointm)
-                if selectedM:
+                if self.selectedM:
                     self.keypointsM= newmk
                 print('keym', len(self.keypointsM),len(self.descriptorsM))
     def insertFeature(self):
         if (self.x != -1 and self.y != -1):
             print(self.x, self.y)
             p1 = QPoint()
-            p1.setX(self.x)  # point.pt[0]
-            p1.setY(self.y)  # point.pt[1]
+            p1.setX(self.x)
+            p1.setY(self.y)
 
-            if self.x <= 543 and self.x >= 142 and self.y <= 743 and self.y >= 45:
+            if self.x <= self.scrollf.x()+self.width and self.x >= self.scrollf.x() and self.y <= self.scrollf.y()+self.height and self.y >= self.scrollf.y():
                 rv = self.mapToGlobal(p1)
                 self.newp = self.fixedImageLB.mapFromGlobal(rv)
                 print("selected ", self.newp.x(), self.newp.y())
@@ -283,7 +286,7 @@ class MyGui(QWidget):
                 # newifk.append(newpf)
                 self.keypoints[0].append(cv2.KeyPoint(self.newp.x(), self.newp.y(), 5, _class_id=0))
 
-            if self.x <= 982 and self.x >= 553 and self.y <= 743 and self.y >= 45:
+            elif self.x <= self.scrollm.x()+self.width and self.x >= self.scrollm.x()and self.y <=self.scrollm.y() +self.height and self.y >= self.scrollm.y():
                 rvm = self.mapToGlobal(p1)
                 self.newpm = self.movingImageLB.mapFromGlobal(rvm)
                 print("selected ", self.newpm.x(), self.newpm.y())
@@ -325,24 +328,14 @@ class MyGui(QWidget):
 
         self.fixedImageQI.load(self.filenameFixed)#'/Users/aminoo/Neurosoph/Images/init_image.png')
         self.imf = cv2.imread(self.filenameFixed,flags=0)
-        #self.fixedImageQI.scaled ( 50, 50)#, Qt::IgnoreAspectRatio, Qt::FastTransformation )
-        # self.fixedImageQI.scaledToWidth(450)
-        # self.fixedImageQI.scaledToHeight(700)
+
 
         self.movingImageQI.load(self.filenameMoving)#'/Users/aminoo/Neurosoph/Images/init_image.png')
-        # self.movingImageQI.scaledToWidth(50)
-        # self.movingImageQI.scaledToHeight(70)
 
-       # self.resultQI.load('/Users/aminoo/Neurosoph/Images/init_image.png')
-
-        # self.resultQI.scaledToWidth(50)
-        # self.resultQI.scaledToHeight(70)
 
 
         pixMapF = QPixmap.fromImage(self.fixedImageQI)
         pixMapM = QPixmap.fromImage(self.movingImageQI)
-       # pixMapR = QPixmap.fromImage(self.resultQI)
-        # label.setPixmap(pixMap)
 
 
        # self.resultLB.setPixmap(pixMapR)
